@@ -53,6 +53,22 @@ const AP_Param::Info Plane::var_info[] = {
     // @User: Advanced
     GSCALAR(landn_target_cd, "LANDN_TARGET_CD",  -4500),
 
+    // @Param: LANDN_LAT
+    // @DisplayName: LANDN lat
+    // @Description: Latitude of landing net center position (LANDN mode).
+    // @Units: deg
+    // @Range: -90 90
+    // @User: Advanced
+    GSCALAR(landn_lat, "LANDN_LAT", 0),
+
+    // @Param: LANDN_LON
+    // @DisplayName: LANDN lon
+    // @Description: Longitude of landing net center position (LANDN mode).
+    // @Units: deg
+    // @Range: -180 180
+    // @User: Advanced
+    GSCALAR(landn_lon, "LANDN_LON", 0),
+
     // @Param: AUTOTUNE_LEVEL
     // @DisplayName: Autotune level
     // @Description: Level of aggressiveness of pitch and roll PID gains. Lower values result in a 'softer' tune. Level 6 recommended for most planes. A value of 0 means to keep the current values of RMAX and TCONST for the controllers, tuning only the PID values

@@ -344,6 +344,8 @@ public:
 
         k_param_landn_rate,
         k_param_landn_target_cd,
+        k_param_landn_lat,
+        k_param_landn_lon,
 
         k_param_logger = 253, // Logging Group
 
@@ -452,6 +454,8 @@ public:
     AP_Int16 FBWB_min_altitude_cm;
     AP_Float landn_rate;
     AP_Int32 landn_target_cd;
+    AP_Float landn_lat;
+    AP_Float landn_lon;
 
     AP_Int8 flap_1_percent;
     AP_Int8 flap_1_speed;

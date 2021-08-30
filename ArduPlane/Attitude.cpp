@@ -431,8 +431,18 @@ void Plane::stabilize_landn(float speed_scaler)
     // limit target angle form -8900 cdeg to -1000 cdeg
     int32_t target_cd = constrain_int32(g.landn_target_cd, -8900, -1000);
 
+    // get net center position from parameters
+    Location landn;
+    landn.lat=g.landn_lat;
+    landn.lng=g.landn_lon;
+    
+    // calculate distance to net
+    float landn_dist=current_loc.get_distance(landn);
+
     //  roll locked mode, hold the roll we had when we enter the mode
-    if (!landn_state.locked_roll) {
+    if (landn_dist > 8.0) {
+        landn_state.locked_roll_err = 0; // do nothing until we are close to the net
+    } else if (!landn_state.locked_roll) {
         landn_state.locked_roll = true;
         landn_state.locked_roll_err = 0;
     } else {
@@ -446,7 +456,12 @@ void Plane::stabilize_landn(float speed_scaler)
                                                                                              speed_scaler,
                                                                                              true));
 
-    if(landn_state.locked_pitch) {
+    if (landn_dist > 8.0) {
+        nav_pitch_cd=landn_state.initial_pitch;
+        SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(nav_pitch_cd - ahrs.pitch_sensor,
+                                                                                               speed_scaler,
+                                                                                               false));
+    } else if (landn_state.locked_pitch) {
         // try to hold the locked pitch. Note that we have the pitch
         // integrator enabled, which helps with inverted flight
         nav_pitch_cd = landn_state.locked_pitch_cd;
@@ -461,6 +476,8 @@ void Plane::stabilize_landn(float speed_scaler)
 
         SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_rate_out(pitch_rate, speed_scaler));
     }
+
+    if (landn_dist < 10.0) SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, 0);
 
     /*
       manual rudder for now

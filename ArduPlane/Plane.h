@@ -418,6 +418,7 @@ private:
         bool locked_pitch;
         float locked_roll_err;
         int32_t locked_pitch_cd;
+        float initial_pitch;
     } landn_state;
 
     struct {

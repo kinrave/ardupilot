@@ -5,6 +5,7 @@ bool ModeLandn::_enter()
 {
     plane.landn_state.locked_roll = false;
     plane.landn_state.locked_pitch = false;
+    plane.landn_state.initial_pitch = plane.ahrs.pitch_sensor;
 
     return true;
 }
@@ -22,7 +23,4 @@ void ModeLandn::update()
     } else {
         plane.nav_pitch_cd = plane.ahrs.pitch_sensor;
     }
-
-    // turn off motor
-    SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, 0);
 }
