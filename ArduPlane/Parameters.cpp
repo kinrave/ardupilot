@@ -36,7 +36,23 @@ const AP_Param::Info Plane::var_info[] = {
     // @Path: ../libraries/AP_SerialManager/AP_SerialManager.cpp
     GOBJECT(serial_manager, "SERIAL",   AP_SerialManager),
 
-     // @Param: LANDN_RATE
+    // @Param: LANDN_LAT
+    // @DisplayName: Net center point LAT
+    // @Description: Net center point latitude for LANDN mode.
+    // @Units: deg
+    // @Range: -90 90
+    // @User: Standard
+    GSCALAR(landn_lat, "LANDN_LAT", 0),
+
+    // @Param: LANDN_LON
+    // @DisplayName: Net center point LON
+    // @Description: Net center point longitude for LANDN mode.
+    // @Units: deg
+    // @Range: -180 180
+    // @User: Standard
+    GSCALAR(landn_lon, "LANDN_LON", 0),
+
+    // @Param: LANDN_RATE
     // @DisplayName: Pitch angle rate
     // @Description: Pitch angle rate to reach target angle
     // @Units: deg/s
@@ -52,22 +68,6 @@ const AP_Param::Info Plane::var_info[] = {
     // @Range: -8900 -1000
     // @User: Advanced
     GSCALAR(landn_target_cd, "LANDN_TARGET_CD",  -4500),
-
-    // @Param: LANDN_LAT
-    // @DisplayName: LANDN lat
-    // @Description: Latitude of landing net center position (LANDN mode).
-    // @Units: deg
-    // @Range: -90 90
-    // @User: Advanced
-    GSCALAR(landn_lat, "LANDN_LAT", 0),
-
-    // @Param: LANDN_LON
-    // @DisplayName: LANDN lon
-    // @Description: Longitude of landing net center position (LANDN mode).
-    // @Units: deg
-    // @Range: -180 180
-    // @User: Advanced
-    GSCALAR(landn_lon, "LANDN_LON", 0),
 
     // @Param: AUTOTUNE_LEVEL
     // @DisplayName: Autotune level

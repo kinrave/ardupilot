@@ -344,8 +344,6 @@ public:
 
         k_param_landn_rate,
         k_param_landn_target_cd,
-        k_param_landn_lat,
-        k_param_landn_lon,
 
         k_param_logger = 253, // Logging Group
 
@@ -356,6 +354,9 @@ public:
         k_param_gcs5,          // stream rates
         k_param_gcs6,          // stream rates
         k_param_fence,         // vehicle fence
+
+        k_param_landn_lat,
+        k_param_landn_lon,
     };
 
     AP_Int16 format_version;
@@ -452,6 +453,7 @@ public:
     AP_Int32 RTL_altitude_cm;
     AP_Int16 pitch_trim_cd;
     AP_Int16 FBWB_min_altitude_cm;
+
     AP_Float landn_rate;
     AP_Int32 landn_target_cd;
     AP_Float landn_lat;
