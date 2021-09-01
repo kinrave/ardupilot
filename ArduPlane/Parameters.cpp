@@ -36,21 +36,13 @@ const AP_Param::Info Plane::var_info[] = {
     // @Path: ../libraries/AP_SerialManager/AP_SerialManager.cpp
     GOBJECT(serial_manager, "SERIAL",   AP_SerialManager),
 
-    // @Param: LANDN_LAT
-    // @DisplayName: Net center point LAT
-    // @Description: Net center point latitude for LANDN mode.
-    // @Units: deg
-    // @Range: -90 90
+    // @Param: LANDN_INIT_DIST
+    // @DisplayName: Distance to init LANDN
+    // @Description: The distance to the last WP to init the LANDN dive.
+    // @Units: m
+    // @Range: 0 50
     // @User: Standard
-    GSCALAR(landn_lat, "LANDN_LAT", 0),
-
-    // @Param: LANDN_LON
-    // @DisplayName: Net center point LON
-    // @Description: Net center point longitude for LANDN mode.
-    // @Units: deg
-    // @Range: -180 180
-    // @User: Standard
-    GSCALAR(landn_lon, "LANDN_LON", 0),
+    GSCALAR(landn_init_dist, "LANDN_INIT_DIST", 5),
 
     // @Param: LANDN_RATE
     // @DisplayName: Pitch angle rate
