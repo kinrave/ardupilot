@@ -424,10 +424,10 @@ void Plane::stabilize_acro(float speed_scaler)
  */
 void Plane::stabilize_landn(float speed_scaler)
 {
-    // limit rate to -100 deg/s to -10 deg/s
+    // limit rate from -270 deg/s to -10 deg/s
     float pitch_rate = g.landn_rate;
     float landn_init_distance_m = g.landn_init_dist;
-    pitch_rate = constrain_float(pitch_rate, -100, -10);
+    pitch_rate = constrain_float(pitch_rate, -270, -10);
 
     // limit target angle form -8900 cdeg to -1000 cdeg
     int32_t target_cd = constrain_int32(g.landn_target_cd, -8900, -1000);
