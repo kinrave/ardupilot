@@ -438,11 +438,11 @@ void Plane::stabilize_landn(float speed_scaler)
     float longitudinal_wp_dist;
     get_wp_distance_m(wp_distance_m);
     get_wp_crosstrack_error_m(lateral_wp_dist);
-    longitudinal_wp_dist=safe_sqrt( wp_distance_m^2 - lateral_wp_dist^2 );
+    longitudinal_wp_dist=safe_sqrt( sq(wp_distance_m) - sq(lateral_wp_dist) );
 
 
     //  roll locked mode, hold the roll we had when we enter the mode
-    if (wp_distance_m > landn_init_distance_m && lateral_wp_dist < 5) {
+    if (longitudinal_wp_dist > landn_init_distance_m && lateral_wp_dist < 5) {
         landn_state.locked_roll_err = 0; // do nothing until we are close to the net
     } else if (!landn_state.locked_roll) {
         landn_state.locked_roll = true;
@@ -458,7 +458,7 @@ void Plane::stabilize_landn(float speed_scaler)
                                                                                              speed_scaler,
                                                                                              true));
 
-    if (wp_distance_m > landn_init_distance_m && lateral_wp_dist < 5) {
+    if (longitudinal_wp_dist > landn_init_distance_m && lateral_wp_dist < 5) {
         nav_pitch_cd=landn_state.initial_pitch;
         SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(nav_pitch_cd - ahrs.pitch_sensor,
                                                                                                speed_scaler,
@@ -479,7 +479,7 @@ void Plane::stabilize_landn(float speed_scaler)
         SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_rate_out(pitch_rate, speed_scaler));
     }
 
-    if (wp_distance_m < (landn_init_distance_m+2.0) && lateral_wp_dist < 5) SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, 0);
+    if (longitudinal_wp_dist < (landn_init_distance_m+2.0) && lateral_wp_dist < 5) SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, 0);
 
     /*
       manual rudder for now
