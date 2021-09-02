@@ -425,26 +425,36 @@ void Plane::stabilize_acro(float speed_scaler)
 void Plane::stabilize_landn(float speed_scaler)
 {
     // limit rate from -270 deg/s to -10 deg/s
-    float pitch_rate = g.landn_rate;
-    float landn_init_distance_m = g.landn_init_dist;
-    pitch_rate = constrain_float(pitch_rate, -270, -10);
+    float pitch_rate = constrain_float(g.landn_rate, -270, -10);
 
     // limit target angle form -8900 cdeg to -1000 cdeg
     int32_t target_cd = constrain_int32(g.landn_target_cd, -8900, -1000);
 
-    // calculate distance to net
+    // limit maneuver init distance to last WP
+    float landn_init_distance_m = constrain_float(g.landn_init_dist,1,50);
+
     float wp_distance_m;
     float lateral_wp_dist;
-    float longitudinal_wp_dist;
-    get_wp_distance_m(wp_distance_m);
-    get_wp_crosstrack_error_m(lateral_wp_dist);
-    longitudinal_wp_dist=safe_sqrt( sq(wp_distance_m) - sq(lateral_wp_dist) );
+    float sq_longitudinal_wp_dist;
+
+    if (landn_state.wait_for_maneuver) {
+        // calculate distance to net
+        get_wp_distance_m(wp_distance_m);
+        get_wp_crosstrack_error_m(lateral_wp_dist);
+        // use squared distance (using safe_sqrt resulted in float exception)
+        sq_longitudinal_wp_dist=( sq(wp_distance_m) - sq(lateral_wp_dist) );
+        if (lateral_wp_dist < 5) {
+            // cut motors 2 m before starting the maneuver
+            // IMPROVE: decide time-dependent?
+            if (sq_longitudinal_wp_dist < sq(landn_init_distance_m+2.0)) SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, 0);
+            // decide whether wait for maneuver or not
+            if (sq_longitudinal_wp_dist < sq(landn_init_distance_m)) landn_state.wait_for_maneuver = false;
+        }
+    }
 
 
     //  roll locked mode, hold the roll we had when we enter the mode
-    if (longitudinal_wp_dist > landn_init_distance_m || lateral_wp_dist > 5) {
-        landn_state.locked_roll_err = 0; // do nothing until we are close to the net
-    } else if (!landn_state.locked_roll) {
+    if (!landn_state.locked_roll) {
         landn_state.locked_roll = true;
         landn_state.locked_roll_err = 0;
     } else {
@@ -458,7 +468,9 @@ void Plane::stabilize_landn(float speed_scaler)
                                                                                              speed_scaler,
                                                                                              true));
 
-    if (longitudinal_wp_dist > landn_init_distance_m || lateral_wp_dist > 5) {
+    if (landn_state.wait_for_maneuver) {
+        // try to hold the initial pitch
+        // IMPROVE: hold altitude?
         nav_pitch_cd=landn_state.initial_pitch;
         SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(nav_pitch_cd - ahrs.pitch_sensor,
                                                                                                speed_scaler,
@@ -478,8 +490,6 @@ void Plane::stabilize_landn(float speed_scaler)
 
         SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_rate_out(pitch_rate, speed_scaler));
     }
-
-    if (longitudinal_wp_dist < (landn_init_distance_m+2.0) && lateral_wp_dist < 5) SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, 0);
 
     /*
       manual rudder for now

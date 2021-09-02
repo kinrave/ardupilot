@@ -3,6 +3,7 @@
 
 bool ModeLandn::_enter()
 {
+    plane.landn_state.wait_for_maneuver = true;
     plane.landn_state.locked_roll = false;
     plane.landn_state.locked_pitch = false;
     plane.landn_state.initial_pitch = plane.ahrs.pitch_sensor;

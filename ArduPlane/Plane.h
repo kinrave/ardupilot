@@ -416,6 +416,7 @@ private:
      struct {
         bool locked_roll;
         bool locked_pitch;
+        bool wait_for_maneuver;
         float locked_roll_err;
         int32_t locked_pitch_cd;
         float initial_pitch;

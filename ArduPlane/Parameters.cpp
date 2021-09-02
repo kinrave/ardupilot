@@ -40,7 +40,7 @@ const AP_Param::Info Plane::var_info[] = {
     // @DisplayName: Distance to init LANDN
     // @Description: The distance to the last WP to init the LANDN dive.
     // @Units: m
-    // @Range: 0 50
+    // @Range: 1 50
     // @User: Standard
     GSCALAR(landn_init_dist, "LANDN_INIT_DIST", 5),
 
