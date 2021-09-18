@@ -424,71 +424,33 @@ void Plane::stabilize_acro(float speed_scaler)
  */
 void Plane::stabilize_landn(float speed_scaler)
 {
-    // limit rate from -270 deg/s to -10 deg/s
-    float pitch_rate = constrain_float(g.landn_rate, -270, -10);
-
-    // limit target angle form -8900 cdeg to -1000 cdeg
-    int32_t target_cd = constrain_int32(g.landn_target_cd, -8900, -1000);
-
-    // limit maneuver init distance to last WP
-    float landn_init_distance_m = constrain_float(g.landn_init_dist,1,50);
-
-    float wp_distance_m;
-    float lateral_wp_dist;
-    float sq_longitudinal_wp_dist;
-
-    if (landn_state.wait_for_maneuver) {
-        // calculate distance to net
-        get_wp_distance_m(wp_distance_m);
-        get_wp_crosstrack_error_m(lateral_wp_dist);
-        // use squared distance (using safe_sqrt resulted in float exception)
-        sq_longitudinal_wp_dist=( sq(wp_distance_m) - sq(lateral_wp_dist) );
-        if (lateral_wp_dist < 5) {
-            // cut motors 2 m before starting the maneuver
-            // IMPROVE: decide time-dependent?
-            if (sq_longitudinal_wp_dist < sq(landn_init_distance_m+2.0)) SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, 0);
-            // decide whether wait for maneuver or not
-            if (sq_longitudinal_wp_dist < sq(landn_init_distance_m)) landn_state.wait_for_maneuver = false;
-        }
-    }
-
-
-    //  roll locked mode, hold the roll we had when we enter the mode
-    if (!landn_state.locked_roll) {
-        landn_state.locked_roll = true;
-        landn_state.locked_roll_err = 0;
+    if (!landn_state.diving) {
+        SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, rollController.get_servo_out(nav_roll_cd - ahrs.roll_sensor, speed_scaler, false));
+        SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(nav_pitch_cd - ahrs.pitch_sensor, speed_scaler, false));
     } else {
-        landn_state.locked_roll_err += ahrs.get_gyro().x * G_Dt;
-    }
-    int32_t roll_error_cd = -ToDeg(landn_state.locked_roll_err)*100;
-    nav_roll_cd = ahrs.roll_sensor + roll_error_cd;
-    // try to reduce the integrated angular error to zero. We set
-    // 'stabilze' to true, which disables the roll integrator
-    SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, rollController.get_servo_out(roll_error_cd,
-                                                                                             speed_scaler,
-                                                                                             true));
-
-    if (landn_state.wait_for_maneuver) {
-        // try to hold the initial pitch
-        // IMPROVE: hold altitude?
-        nav_pitch_cd=landn_state.initial_pitch;
-        SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(nav_pitch_cd - ahrs.pitch_sensor,
-                                                                                               speed_scaler,
-                                                                                               false));
-    } else if (landn_state.locked_pitch) {
-        // try to hold the locked pitch. Note that we have the pitch
-        // integrator enabled, which helps with inverted flight
-        nav_pitch_cd = landn_state.locked_pitch_cd;
-        SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(nav_pitch_cd - ahrs.pitch_sensor,
-                                                                                               speed_scaler,
-                                                                                               false));
-    } else {
-        if(ahrs.pitch_sensor < target_cd) {
-            landn_state.locked_pitch = true;
-            landn_state.locked_pitch_cd = target_cd;
+        //  roll locked mode, hold the roll we had when we enter the mode
+        if (landn_state.locked_roll) {
+            landn_state.locked_roll_err += ahrs.get_gyro().x * G_Dt;
         }
-
-        SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_rate_out(pitch_rate, speed_scaler));
+        int32_t roll_error_cd = -ToDeg(landn_state.locked_roll_err)*100;
+        nav_roll_cd = ahrs.roll_sensor + roll_error_cd;
+        // try to reduce the integrated angular error to zero. We set
+        // 'stabilize' to true, which disables the roll integrator
+        SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, rollController.get_servo_out(roll_error_cd, speed_scaler, true));
+        
+        if (landn_state.locked_pitch) {
+            // try to hold the locked pitch. Note that we have the pitch
+            // integrator enabled, which helps with inverted flight
+            nav_pitch_cd = landn_state.locked_pitch_cd;
+            SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(nav_pitch_cd - ahrs.pitch_sensor, speed_scaler, false));
+        } else {
+            if (ahrs.pitch_sensor <= landn_state.landn_target_cd) {
+                landn_state.locked_pitch = true;
+                landn_state.locked_pitch_cd = landn_state.landn_target_cd;
+                gcs().send_text(MAV_SEVERITY_CRITICAL,"LANDN: pitch locked, target %i, ahrs %i",landn_state.landn_target_cd,ahrs.pitch_sensor);
+            }
+            SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_rate_out(landn_state.landn_rate, speed_scaler));
+        }
     }
 
     /*

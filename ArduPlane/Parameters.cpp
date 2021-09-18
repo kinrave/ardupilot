@@ -36,31 +36,6 @@ const AP_Param::Info Plane::var_info[] = {
     // @Path: ../libraries/AP_SerialManager/AP_SerialManager.cpp
     GOBJECT(serial_manager, "SERIAL",   AP_SerialManager),
 
-    // @Param: LANDN_INIT_DIST
-    // @DisplayName: Distance to init LANDN
-    // @Description: The distance to the last WP to init the LANDN dive.
-    // @Units: m
-    // @Range: 1 50
-    // @User: Standard
-    GSCALAR(landn_init_dist, "LANDN_INIT_DIST", 5),
-
-    // @Param: LANDN_RATE
-    // @DisplayName: Pitch angle rate
-    // @Description: Pitch angle rate to reach target angle
-    // @Units: deg/s
-    // @Range: -100 -10
-    // @Increment: 1
-    // @User: Standard
-    GSCALAR(landn_rate, "LANDN_RATE", -20),
-
-    // @Param: LANDN_TARGET_CD
-    // @DisplayName: Target angle
-    // @Description: Target angle for LANDN mode.
-    // @Units: cdeg
-    // @Range: -8900 -1000
-    // @User: Advanced
-    GSCALAR(landn_target_cd, "LANDN_TARGET_CD",  -4500),
-
     // @Param: AUTOTUNE_LEVEL
     // @DisplayName: Autotune level
     // @Description: Level of aggressiveness of pitch and roll PID gains. Lower values result in a 'softer' tune. Level 6 recommended for most planes. A value of 0 means to keep the current values of RMAX and TCONST for the controllers, tuning only the PID values
@@ -1037,6 +1012,10 @@ const AP_Param::Info Plane::var_info[] = {
     // @Group: LAND_
     // @Path: ../libraries/AP_Landing/AP_Landing.cpp
     GOBJECT(landing, "LAND_", AP_Landing),
+
+    // @Group: LANDN_
+    // @Path: mode_landn.cpp
+    GOBJECT(mode_landn, "LANDN_", ModeLandn),
 
 #if OSD_ENABLED || OSD_PARAM_ENABLED
     // @Group: OSD

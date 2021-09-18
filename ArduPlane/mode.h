@@ -653,6 +653,8 @@ class ModeLandn: public Mode
 {
 public:
 
+    ModeLandn();
+
     Number mode_number() const override { return Number::LANDN; }
     const char *name() const override { return "LANDN"; }
     const char *name4() const override { return "LNDN"; }
@@ -660,7 +662,17 @@ public:
     // methods that affect movement of the vehicle in this mode
     void update() override;
 
+    // var_info for holding parameter information
+    static const struct AP_Param::GroupInfo var_info[];
+
 protected:
 
-     bool _enter() override;
+    AP_Float xt_acceptable;
+    AP_Float dt_motor_cut;
+    AP_Float landn_init_dist;
+    AP_Float landn_rate;
+    AP_Int32 landn_target_cd;
+    AP_Int8 bank_acceptable;
+
+    bool _enter() override;
 };

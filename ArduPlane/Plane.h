@@ -412,14 +412,19 @@ private:
         int32_t locked_pitch_cd;
     } acro_state;
 
-    // LANDN controller state
-     struct {
-        bool locked_roll;
+    struct {
+        bool motors_off;
+        bool diving;
+        bool locked_roll; // equals "diving" ?
         bool locked_pitch;
-        bool wait_for_maneuver;
         float locked_roll_err;
         int32_t locked_pitch_cd;
-        float initial_pitch;
+        float xt_error;
+        float wp_distance;
+        float longitudinal_wp_dist;
+        float landn_init_dist;
+        float landn_rate;
+        int32_t landn_target_cd;
     } landn_state;
 
     struct {
