@@ -428,7 +428,7 @@ void Plane::stabilize_landn(float speed_scaler)
         SRV_Channels::set_output_scaled(SRV_Channel::k_aileron, rollController.get_servo_out(nav_roll_cd - ahrs.roll_sensor, speed_scaler, false));
         SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(nav_pitch_cd - ahrs.pitch_sensor, speed_scaler, false));
     } else {
-        //  roll locked mode, hold the roll we had when we enter the mode
+        //  roll locked mode, hold the roll we had when we entered the mode
         if (landn_state.locked_roll) {
             landn_state.locked_roll_err += ahrs.get_gyro().x * G_Dt;
         }
@@ -442,12 +442,16 @@ void Plane::stabilize_landn(float speed_scaler)
             // try to hold the locked pitch. Note that we have the pitch
             // integrator enabled, which helps with inverted flight
             nav_pitch_cd = landn_state.locked_pitch_cd;
-            SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(nav_pitch_cd - ahrs.pitch_sensor, speed_scaler, false));
+            int32_t pitch_error = nav_pitch_cd - ahrs.pitch_sensor;
+            // prevent mirroring at -90 deg if you demanded a steep pitch angle
+            if (abs(ahrs.roll_sensor) > 9000) {
+                pitch_error = nav_pitch_cd  + ahrs.pitch_sensor - 18000;
+            }
+            SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(pitch_error, speed_scaler, false));
         } else {
             if (ahrs.pitch_sensor <= landn_state.landn_target_cd) {
                 landn_state.locked_pitch = true;
                 landn_state.locked_pitch_cd = landn_state.landn_target_cd;
-                gcs().send_text(MAV_SEVERITY_CRITICAL,"LANDN: pitch locked, target %i, ahrs %i",landn_state.landn_target_cd,ahrs.pitch_sensor);
             }
             SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_rate_out(landn_state.landn_rate, speed_scaler));
         }

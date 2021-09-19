@@ -662,10 +662,28 @@ public:
     // methods that affect movement of the vehicle in this mode
     void update() override;
 
+    // data logger for state switches
+    void log(uint8_t landn_state = 0);
+
     // var_info for holding parameter information
     static const struct AP_Param::GroupInfo var_info[];
 
 protected:
+
+    // stage enum for logging etc
+    enum LANDN_STAGE : uint8_t {
+        LANDN_ENTER        = 0,
+        LANDN_NAVIGATE     = 1,
+        LANDN_CUT_MOTOR    = 2,
+        LANDN_GLIDE        = 3,
+        LANDN_INIT_DIVE    = 4,
+        LANDN_PITCH_DOWN   = 5,
+        LANDN_LOCK_PITCH   = 6,
+        LANDN_DIVE         = 7,
+        LANDN_NET_REACHED  = 8,
+        LANDN_LANDN_END    = 9,
+        LANDN_RTL_EXIT     = 10,
+    };
 
     AP_Float xt_acceptable;
     AP_Float dt_motor_cut;
@@ -673,6 +691,8 @@ protected:
     AP_Float landn_rate;
     AP_Int32 landn_target_cd;
     AP_Int8 bank_acceptable;
+    AP_Int8 wp_height_above_net;
+    LANDN_STAGE stage;
 
     bool _enter() override;
 };

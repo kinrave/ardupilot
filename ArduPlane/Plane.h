@@ -425,6 +425,7 @@ private:
         float landn_init_dist;
         float landn_rate;
         int32_t landn_target_cd;
+        //ModeLandn::LANDN_STAGE stage;
     } landn_state;
 
     struct {
