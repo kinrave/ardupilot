@@ -413,6 +413,8 @@ private:
     } acro_state;
 
     struct {
+        Location approach_WP;
+        Location net_WP;
         bool motors_off;
         bool diving;
         bool locked_roll; // equals "diving" ?

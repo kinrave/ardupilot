@@ -1,4 +1,5 @@
 #NAME=latitude,longitude,absolute-altitude,heading
+Panker=54.370536,10.567812,10,310
 Beienrode=52.278253,10.828629,103,85
 EDVP=52.402446,10.228778,76,250
 OSRF0=37.4003371,-122.0800351,0,353

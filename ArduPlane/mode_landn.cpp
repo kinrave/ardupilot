@@ -74,6 +74,8 @@ ModeLandn::ModeLandn()
 
 bool ModeLandn::_enter()
 {
+    plane.landn_state.approach_WP = plane.prev_WP_loc;
+    plane.landn_state.net_WP = plane.next_WP_loc;
     plane.landn_state.motors_off = false;
     plane.landn_state.diving = false;
     plane.landn_state.locked_roll = false;
@@ -139,14 +141,14 @@ void ModeLandn::update()
         }
     }
 
-    float dive_height = (plane.next_WP_loc.alt-plane.current_loc.alt) * 0.01;
+    int16_t dive_height_cm = (plane.landn_state.net_WP.alt-plane.current_loc.alt);
     if (stage == LANDN_PITCH_DOWN && plane.landn_state.locked_pitch) {
         // update stage and log
         stage = LANDN_LOCK_PITCH;
         log(stage);
         gcs().send_text(MAV_SEVERITY_INFO,"LANDN: pitch locked");
         stage = LANDN_DIVE;
-    } else if (stage == LANDN_DIVE && abs(dive_height) >= wp_height_above_net) {
+    } else if (stage == LANDN_DIVE && (abs(dive_height_cm) >= wp_height_above_net * 100)) {
         // update stage and log
         stage = LANDN_NET_REACHED;
         log(stage);
@@ -161,7 +163,7 @@ void ModeLandn::log(uint8_t landn_state)
     Vector3f gsVec;
     plane.ahrs.get_velocity_NED(gsVec);
     Vector3f wVec = plane.ahrs.wind_estimate();
-    float dive_height = (plane.next_WP_loc.alt-plane.current_loc.alt) * 0.01;
+    float dive_height = (plane.landn_state.net_WP.alt-plane.current_loc.alt) * 0.01;
     plane.get_wp_crosstrack_error_m(plane.landn_state.xt_error);
     plane.get_wp_distance_m(plane.landn_state.wp_distance);
     plane.landn_state.longitudinal_wp_dist = safe_sqrt(MAX(sq(plane.landn_state.wp_distance)-sq(plane.landn_state.xt_error),0.0));
@@ -190,9 +192,9 @@ void ModeLandn::log(uint8_t landn_state)
                                         (double)SRV_Channels::get_output_norm(SRV_Channel::k_throttle));
     if (stage == LANDN_NET_REACHED) {
         // prepare dLon, dLat, dive, inertial speed, inertial direction (with respect to wp-dir) and pitch
-        Vector3f Plane2WP = plane.current_loc.get_distance_NED(plane.next_WP_loc);
+        Vector3f Plane2WP = plane.current_loc.get_distance_NED(plane.landn_state.net_WP);
         Plane2WP.z = 0;
-        Vector3f vec_NEU_WPs = plane.prev_WP_loc.get_distance_NED(plane.next_WP_loc);
+        Vector3f vec_NEU_WPs = plane.landn_state.approach_WP.get_distance_NED(plane.landn_state.net_WP);
         vec_NEU_WPs.z = 0;
         // because Vectro3f.angle isnt defined above 90 deg
         if (Plane2WP * vec_NEU_WPs < 0) {
