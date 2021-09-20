@@ -156,7 +156,7 @@ void ModeLandn::update()
     }
 }
 
-void ModeLandn::log(uint8_t landn_state)
+void ModeLandn::log(uint8_t landn_stage)
 {
     float as_estimate;
     plane.ahrs.airspeed_estimate(as_estimate);
@@ -169,7 +169,7 @@ void ModeLandn::log(uint8_t landn_state)
     plane.landn_state.longitudinal_wp_dist = safe_sqrt(MAX(sq(plane.landn_state.wp_distance)-sq(plane.landn_state.xt_error),0.0));
     AP::logger().Write("LDN1", "TimeUS,state,R,P,Y,AS,gsX,gsY,gsZ", "QBfffffff",
                                         AP_HAL::micros64(),
-                                        landn_state,
+                                        landn_stage,
                                         (double)ToDeg(plane.ahrs.roll),
                                         (double)ToDeg(plane.ahrs.pitch),
                                         (double)ToDeg(plane.ahrs.yaw),
@@ -179,7 +179,7 @@ void ModeLandn::log(uint8_t landn_state)
                                         (double)gsVec.z);
     AP::logger().Write("LDN2", "TimeUS,state,wX,wY,wZ,alt,div_hgt,dist,xt,dist_along,elev,thr", "QBffffffffff",
                                         AP_HAL::micros64(),
-                                        landn_state,
+                                        landn_stage,
                                         (double)wVec.x,
                                         (double)wVec.y,
                                         (double)wVec.z,
@@ -190,7 +190,7 @@ void ModeLandn::log(uint8_t landn_state)
                                         (double)plane.landn_state.longitudinal_wp_dist,
                                         (double)SRV_Channels::get_output_norm(SRV_Channel::k_elevator),
                                         (double)SRV_Channels::get_output_norm(SRV_Channel::k_throttle));
-    if (stage == LANDN_NET_REACHED) {
+    if (landn_stage == LANDN_NET_REACHED) {
         // prepare dLon, dLat, dive, inertial speed, inertial direction (with respect to wp-dir) and pitch
         Vector3f Plane2WP = plane.current_loc.get_distance_NED(plane.landn_state.net_WP);
         Plane2WP.z = 0;
