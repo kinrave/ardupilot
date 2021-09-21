@@ -443,10 +443,10 @@ void Plane::stabilize_landn(float speed_scaler)
             // integrator enabled, which helps with inverted flight
             nav_pitch_cd = landn_state.locked_pitch_cd;
             int32_t pitch_error = nav_pitch_cd - ahrs.pitch_sensor;
-            // prevent mirroring at -90 deg if you demanded a steep pitch angle
-            if (abs(ahrs.roll_sensor) > 9000) {
-                pitch_error = nav_pitch_cd  + ahrs.pitch_sensor - 18000;
-            }
+            // // prevent mirroring at -90 deg if you demanded a steep pitch angle
+            // if (abs(ahrs.roll_sensor) > 9000) {
+            //     pitch_error = nav_pitch_cd  + ahrs.pitch_sensor - 18000;
+            // }
             SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(pitch_error, speed_scaler, false));
         } else {
             if (ahrs.pitch_sensor <= landn_state.landn_target_cd) {

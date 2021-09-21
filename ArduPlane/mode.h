@@ -663,7 +663,7 @@ public:
     void update() override;
 
     // data logger for state switches
-    void log(uint8_t landn_state = 0);
+    void landn_log();
 
     // var_info for holding parameter information
     static const struct AP_Param::GroupInfo var_info[];
@@ -692,7 +692,8 @@ protected:
     AP_Int32 landn_target_cd;
     AP_Int8 bank_acceptable;
     AP_Int8 wp_height_above_net;
-    LANDN_STAGE stage;
+    AP_Int8 dt_maneuver_ds;
+    LANDN_STAGE landn_stage;
 
     bool _enter() override;
 };
